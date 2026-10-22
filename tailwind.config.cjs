@@ -1,0 +1,1 @@
+module.exports={content:['./index.html','./src/**/*.{ts,tsx}'],theme:{extend:{colors:{forest:'#173c32',pine:'#245548',sage:'#e9f1e9',cream:'#f8f9f5',ink:'#263b34',muted:'#71837a',mint:'#b9d7c2',gold:'#dca95d'},boxShadow:{soft:'0 10px 30px rgba(27,58,43,.06)'},fontFamily:{sans:['Inter','ui-sans-serif','system-ui','sans-serif']}}},plugins:[]}
