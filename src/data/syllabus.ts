@@ -1,9 +1,10 @@
+import { expandedLessons } from './expandedLessons';
 export interface Lesson {id:string; lo:number; week:number; title:string; intro:string; notes:string[]; definitions:[string,string][]; example:string; points:string[]; traps:string[]}
 export const outcomeNames = [
 'Mortgage regulation & MCOB','House-buying & conveyancing','Valuations, surveys & defects','Borrower needs & security','Economic context','Adviser duties & affordability','Fees, charges & tax','Mortgage-related protection','Further borrowing & transfers','Debt consolidation','Arrears & repossession','State support & schemes','Homeownership & tenure law','Mortgage products & rates','Repayment methods','Applied client advice'];
 export const examWeights=[6,10,12,6,2,6,6,5,8,2,4,4,3,17,9,25];
 const L=(lo:number,week:number,intro:string,notes:string[],definitions:[string,string][],example:string,points:string[],traps:string[]):Lesson=>({id:`lo${lo}`,lo,week,title:outcomeNames[lo-1],intro,notes,definitions,example,points,traps});
-export const lessons:Lesson[]=[
+const baseLessons:Lesson[]=[
 L(1,1,'Start by deciding which transaction and activity the mortgage rules govern.',[
 'FCA mortgage conduct requirements are found chiefly in the Mortgages and Home Finance: Conduct of Business sourcebook (MCOB). Scope matters: first identify whether the contract is regulated and whether the firm advises, arranges or lends. Second-charge mortgage lending is regulated; do not assume every property-backed business loan has identical consumer protections.',
 'Mortgage advisers must collect enough relevant facts to assess suitability, make required disclosures, and explain significant risks. A recommendation must reflect the customer’s needs and circumstances, not merely the cheapest headline rate.',
@@ -66,3 +67,9 @@ L(16,6,'Apply the same consistent advice process to complete client cases.',[
 'Use a repeatable order: identify non-negotiable requirements; calculate borrowing, LTV and costs; screen out unacceptable products; compare total costs and risks; make a reasoned recommendation with appropriate warnings.',
 'The CII’s exam provides a lender criteria/product list for the case-study questions. In this app, practice cases use explicitly fictional criteria only.'],[['Affordability stress','Assessing whether payments remain manageable under adverse but relevant circumstances.'],['Whole-of-term suitability','Assessing more than an initial promotional rate.']], 'Client has £35,000 deposit and £315,000 purchase price: required loan £280,000; LTV about 88.9%. If a fictional case lender caps 85%, that option is ineligible without a larger deposit.',['Show working for numerical comparisons','Eliminate ineligible products first'],['Do not invent real lender criteria','Beware “MOST” and “LEAST” qualifier wording'])
 ];
+
+// Preserve existing lo1..lo16 identifiers so locally saved lesson completion survives.
+export const lessons:Lesson[] = baseLessons.map(lesson => ({
+  ...lesson,
+  notes: [...lesson.notes, ...(expandedLessons[lesson.lo] ?? [])]
+}));
