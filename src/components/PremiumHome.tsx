@@ -11,10 +11,10 @@ type Props={
  attempts:number;accuracy:number;streak:number;studyTimeSeconds:number;due:number;unresolved:number;
  ready:number|null;strongest?:TopicPerformance;weakest?:TopicPerformance;
  onLesson:(id:string)=>void;onDaily:()=>void;onFlashcards:()=>void;onMistakes:()=>void;
- onResult:(id:string)=>void;onProgress:()=>void;onStudy:()=>void;
+ onResult:(id:string)=>void;onProgress:()=>void;onStudy:()=>void;onLab:()=>void;
 };
 const pct=(a:number,b:number)=>b?Math.round(100*a/b):0;
-export default function PremiumHome({progress:p,suggested,completed,currentDay,daysToExam,attempts,accuracy,streak,studyTimeSeconds,due,unresolved,ready,strongest,weakest,onLesson,onDaily,onFlashcards,onMistakes,onResult,onProgress,onStudy}:Props){
+export default function PremiumHome({progress:p,suggested,completed,currentDay,daysToExam,attempts,accuracy,streak,studyTimeSeconds,due,unresolved,ready,strongest,weakest,onLesson,onDaily,onFlashcards,onMistakes,onResult,onProgress,onStudy,onLab}:Props){
  const completion=pct(completed,16);
  const activity=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);const day=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;return {label:d.toLocaleDateString('en-GB',{weekday:'short'}),count:p.attempts.filter(a=>a.at.slice(0,10)===day).length}});
  const last=p.history.slice(-3).reverse();
@@ -34,6 +34,7 @@ export default function PremiumHome({progress:p,suggested,completed,currentDay,d
         <div className="rounded-[20px] bg-white/10 border border-white/15 p-4 flex md:flex-col items-center justify-center gap-4 md:gap-1"><div className="relative h-20 w-20 md:h-24 md:w-24 shrink-0"><svg role="img" aria-label={`${completion}% of lessons complete`} viewBox="0 0 100 100" className="h-full w-full -rotate-90"><circle cx="50" cy="50" r="42" fill="none" stroke="#ffffff30" strokeWidth="9"/><circle cx="50" cy="50" r="42" fill="none" stroke="#c8e3ce" strokeWidth="9" strokeLinecap="round" strokeDasharray={`${completion*2.63894} 263.894`} /></svg><span className="absolute inset-0 flex items-center justify-center font-black text-xl md:text-2xl">{completion}%</span></div><div className="md:text-center"><div className="font-extrabold text-sm">Study progress</div><p className="text-xs text-white/70 mt-1">{completed} of 16 outcomes completed</p></div></div>
       </div>
    </section>
+   <button type="button" onClick={onLab} className="w-full rounded-[18px] border-2 border-[#c2dbc9] bg-white hover:bg-[#edf7ef] px-4 py-4 flex items-center justify-between gap-3 text-left"><span className="flex items-center gap-3"><span className="rounded-xl bg-[#e7f3e9] border border-[#d2e5d7] p-2.5 text-[#20583c]"><Target size={19}/></span><span><strong className="block text-sm sm:text-base text-[#174630]">Try the interactive Mortgage Lab</strong><span className="block text-xs text-[#597160] mt-1">Repayments, rate shocks, deposit and affordability — live charts</span></span></span><ArrowRight size={21} className="text-[#2b6b47] shrink-0"/></button>
    <section className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-3" aria-label="Your live study statistics">
      <Metric icon={Brain} label="Questions" value={String(attempts)} note={`${uniqueSeen(p)} different seen`}/>
      <Metric icon={Target} label="Accuracy" value={attempts?`${accuracy}%`:'—'} note={attempts?'From answered questions':'Complete a quiz'}/>

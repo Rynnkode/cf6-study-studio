@@ -12,6 +12,7 @@ export type PremiumLessonViewProps = {
   onBack: () => void;
   onStartCheck: () => void;
   onToggleComplete: () => void;
+  onOpenLab: () => void;
 };
 
 type LessonStage = {title: string; caption: string; detail: string};
@@ -448,7 +449,7 @@ const estimReadingTime = (lesson: Lesson) => {
   return Math.max(4, Math.round(words / 165));
 };
 
-export function PremiumLessonView({lesson, examWeight, completed, onBack, onStartCheck, onToggleComplete}: PremiumLessonViewProps) {
+export function PremiumLessonView({lesson, examWeight, completed, onBack, onStartCheck, onToggleComplete, onOpenLab}: PremiumLessonViewProps) {
   const [tab, setTab] = useState<TabKey>('learn');
   const [activeStage, setActiveStage] = useState(0);
   const [activeDef, setActiveDef] = useState(lesson.definitions[0]?.[0] ?? '');
@@ -506,7 +507,7 @@ export function PremiumLessonView({lesson, examWeight, completed, onBack, onStar
           <div className="grid grid-cols-3 gap-2">{experience.stages.map((stage,i)=><button type="button" key={stage.title} aria-pressed={activeStage===i} onClick={()=>setActiveStage(i)} className={`rounded-xl border-2 min-w-0 px-2.5 py-3 sm:p-4 text-left ${activeStage===i?'bg-[#103f2d] border-[#103f2d] text-white shadow-sm':'bg-[#f7faf7] border-[#dce6dd] text-forest'}`}><span className="block text-[10px] uppercase tracking-widest opacity-70">Step {i+1}</span><strong className="block text-xs sm:text-sm leading-5 mt-2 break-words">{stage.title}</strong></button>)}</div>
           <div role="status" className="rounded-[15px] bg-white border-2 border-[#cbded0] p-4 mt-3"><p className="text-xs font-extrabold uppercase tracking-widest text-[#699178]">{experience.stages[activeStage].caption}</p><p className="text-sm leading-7 text-forest mt-2">{experience.stages[activeStage].detail}</p></div>
         </section>
-        <ConceptLab key={lesson.id} lo={lesson.lo}/>
+        <ConceptLab key={lesson.id} lo={lesson.lo}/><button type="button" onClick={onOpenLab} className="w-full rounded-xl border-2 border-[#9dc8ab] bg-[#f3faf4] p-4 text-left flex justify-between items-center gap-3 text-[#20543a] hover:bg-[#e5f3e8]"><span><strong className="block text-sm">Open the full Mortgage Lab</strong><span className="text-xs block mt-1">Explore repayments, rate shocks, LTV, and budget resilience.</span></span><ArrowRight size={20} className="shrink-0"/></button>
         <section className="rounded-[22px] border-2 border-[#dbe6dd] bg-white p-4 sm:p-6"><h2 className="text-xl font-extrabold text-forest">{experience.compareTitle}</h2><p className="text-xs text-muted mt-2 mb-4">Important distinctions to take into the exam.</p><div className="space-y-2.5">{experience.compareRows.map(row=><details className="group border border-[#dce7dd] rounded-xl overflow-hidden" key={row.label}><summary className="list-none [&::-webkit-details-marker]:hidden px-4 py-3.5 cursor-pointer flex justify-between items-center gap-2 bg-[#f8fbf8]"><strong className="text-sm text-forest">{row.label}</strong><ChevronDown size={17} className="text-[#6c8d79] shrink-0 group-open:rotate-180"/></summary><div className="grid sm:grid-cols-2 gap-0 border-t border-[#e1e9e1]"><p className="text-sm leading-7 p-4 text-forest">{row.left}</p><p className="text-sm leading-7 p-4 bg-[#f8fbf8] text-forest border-t sm:border-t-0 sm:border-l border-[#e1e9e1]">{row.right}</p></div></details>)}</div></section>
       </div>}
       {tab === 'example' && (
