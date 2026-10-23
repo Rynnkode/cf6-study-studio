@@ -1,3 +1,4 @@
+import SyllabusFocus from './SyllabusFocus';
 import {useEffect, useMemo, useState, type ReactNode} from 'react';
 import {ArrowRight, BookOpen, Check, CheckCircle2, ChevronDown, ChevronLeft, CircleHelp, FileText, Lightbulb, ListChecks, MoveRight, TriangleAlert} from 'lucide-react';
 import ConceptLab from './ConceptLab';
@@ -13,6 +14,8 @@ export type PremiumLessonViewProps = {
   onStartCheck: () => void;
   onToggleComplete: () => void;
   onOpenLab: () => void;
+  coverage: Record<string,boolean>;
+  onToggleCoverage: (code:string) => void;
 };
 
 type LessonStage = {title: string; caption: string; detail: string};
@@ -449,7 +452,7 @@ const estimReadingTime = (lesson: Lesson) => {
   return Math.max(4, Math.round(words / 165));
 };
 
-export function PremiumLessonView({lesson, examWeight, completed, onBack, onStartCheck, onToggleComplete, onOpenLab}: PremiumLessonViewProps) {
+export function PremiumLessonView({lesson, examWeight, completed, onBack, onStartCheck, onToggleComplete, onOpenLab, coverage, onToggleCoverage}: PremiumLessonViewProps) {
   const [tab, setTab] = useState<TabKey>('learn');
   const [activeStage, setActiveStage] = useState(0);
   const [activeDef, setActiveDef] = useState(lesson.definitions[0]?.[0] ?? '');
@@ -557,6 +560,7 @@ export function PremiumLessonView({lesson, examWeight, completed, onBack, onStar
       )}
 
       {tab === 'try' && <div className="space-y-4"><section className="rounded-[21px] border-2 border-[#d9e6dd] bg-white p-4 sm:p-6"><p className="text-[11px] tracking-[.17em] uppercase font-extrabold text-[#6e8c77]">Practice before the mock</p><h2 className="text-xl font-extrabold text-forest mt-1">Put it into practice</h2><p className="text-sm text-muted leading-6 mt-2">Try a realistic client decision with instant feedback, then start the graded five-question assessment.</p></section><LessonActivities key={lesson.id} lo={lesson.lo}/><section className="rounded-[21px] border-2 border-[#bdd5c3] bg-white p-4 sm:p-6"><p className="text-[11px] font-extrabold uppercase tracking-wider text-[#6c8a74]">Self-test</p><h3 className="text-lg font-bold text-forest mt-2">{experience.revisionChallenge}</h3><p className="text-sm text-muted leading-6 mt-2">Can you justify your answer and one likely exam trap? Now test your recall with scored questions.</p><button type="button" className="btn-primary mt-4" onClick={onStartCheck}>Start 5-question check <ArrowRight size={16}/></button></section></div>}
+      <SyllabusFocus lo={lesson.lo} checked={coverage} onToggle={onToggleCoverage}/>
       <div className="grid lg:grid-cols-[1fr_auto] gap-3 mt-5 mb-10">
         <button type="button" className={`w-full ${completed ? 'btn-outline' : 'btn-primary'}`} onClick={onToggleComplete}>
           {completed ? <><Check size={18} /> Completed · Mark incomplete</> : <><Check size={18} /> Mark lesson complete</>}
