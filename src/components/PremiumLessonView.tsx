@@ -1,6 +1,7 @@
 import {useEffect, useMemo, useState, type ReactNode} from 'react';
 import {ArrowRight, BookOpen, Check, CheckCircle2, ChevronDown, ChevronLeft, CircleHelp, FileText, Lightbulb, ListChecks, MoveRight, TriangleAlert} from 'lucide-react';
 import ConceptLab from './ConceptLab';
+import {lessonMicroChecks,type MicroCheck} from '../data/lessonMicroChecks';
 import LessonActivities from './LessonActivities';
 import type {Lesson} from '../data/syllabus';
 
@@ -478,17 +479,18 @@ export function PremiumLessonView({lesson, examWeight, completed, onBack, onStar
         <div className="border-t border-[#dbe7de] mt-4 pt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs font-bold text-[#648272]"><span><BookOpen size={14} className="inline mr-1"/>{readingTime} min estimated read</span><span><Lightbulb size={14} className="inline mr-1"/>{lesson.definitions.length} key definitions</span><span><CircleHelp size={14} className="inline mr-1"/>5 practice questions · {examWeight} indicative exam Qs</span></div>
       </header>
       <nav className="grid grid-cols-4 gap-1.5 sm:gap-3 my-4" aria-label="Lesson sections">
-        {tabMeta.map(item=><button type="button" key={item.key} aria-current={tab===item.key?'page':undefined} onClick={()=>setTab(item.key)} className={`min-w-0 rounded-xl border-2 px-1.5 py-3 sm:p-4 text-center sm:text-left transition-colors ${tab===item.key?'bg-[#164532] text-white border-[#164532]':'bg-white text-forest border-[#dce7df] hover:border-[#89ab94]'}`}><span className="block text-[12px] sm:text-base font-extrabold leading-tight">{item.label}</span><span className={`hidden sm:block text-[11px] mt-1 ${tab===item.key?'text-white/75':'text-muted'}`}>{item.note}</span></button>)}
+        {tabMeta.map(item=><button type="button" key={item.key} aria-current={tab===item.key?'page':undefined} onClick={()=>setTab(item.key)} className={`min-w-0 rounded-xl border-2 px-1.5 py-3 sm:p-4 text-center sm:text-left transition-colors ${tab===item.key?'bg-[#103f2d] text-white border-[#103f2d] shadow-[0_3px_10px_rgba(14,58,41,.17)]':'bg-white text-forest border-[#dce7df] hover:border-[#89ab94]'}`}><span className="block text-[12px] sm:text-base font-extrabold leading-tight">{item.label}</span><span className={`hidden sm:block text-[11px] mt-1 ${tab===item.key?'text-white/75':'text-muted'}`}>{item.note}</span></button>)}
       </nav>
       {tab === 'learn' && <div className="space-y-4">
         <section className="rounded-[22px] border-2 border-[#dbe6dd] bg-white p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4"><span className="bg-[#edf5ee] text-[#386b4c] rounded-xl p-2.5"><BookOpen size={19}/></span><div><h2 className="font-extrabold text-xl text-forest">Learn the essentials</h2><p className="text-sm text-muted mt-1">Open a section, read the concept, then test what stayed with you.</p></div></div>
           <div className="space-y-2.5">
-            {learnSections.map((section,i)=><details key={section.title} className="group rounded-[17px] border border-[#dce7de] bg-[#fcfdfc] overflow-hidden" open={i===0}>
+            {learnSections.map((section,i)=><details key={section.title} className="group rounded-[17px] border-2 border-[#ceddd1] bg-white overflow-hidden" open={i===0}>
               <summary className="cursor-pointer list-none flex items-center justify-between gap-3 p-4 sm:p-5 [&::-webkit-details-marker]:hidden"><div><p className="text-[10px] uppercase tracking-[.16em] font-extrabold text-[#7a9782]">Concept {String(i+1).padStart(2,'0')}</p><h3 className="text-base sm:text-lg font-extrabold text-forest mt-1">{section.title}</h3></div><ChevronDown className="group-open:rotate-180 transition-transform shrink-0 text-[#72927c]" size={18}/></summary>
-              <div className="border-t border-[#e2ece4] p-4 sm:p-5 bg-white"><p className="text-sm sm:text-[15px] leading-[1.8] text-[#30483a]">{section.body}</p>
-                <button type="button" onClick={()=>setRevealedTakeaway(revealedTakeaway===i?null:i)} className="mt-5 rounded-xl border border-[#bdd8c6] bg-[#eff6f0] text-[#286445] inline-flex gap-2 items-center px-3 py-2.5 text-xs font-extrabold hover:bg-[#dfeee3]">{revealedTakeaway===i?'Hide':'Reveal'} the takeaway <ChevronDown size={15} className={revealedTakeaway===i?'rotate-180':''}/></button>
-                {revealedTakeaway===i&&<p role="status" className="text-sm leading-7 text-forest border-l-4 border-[#6ea882] bg-[#f1f8f3] px-4 py-3 mt-3 rounded-lg">{lesson.points[i%Math.max(1,lesson.points.length)]||experience.advisorLens}</p>}
+              <div className="border-t border-[#e2ece4] p-4 sm:p-5 bg-white"><ReadableNote body={section.body}/>{(i===0||i===Math.min(2,learnSections.length-1))&&<InlineCheck key={`${lesson.id}-${i}`} check={lessonMicroChecks[lesson.lo][i===0?0:1]}/>}
+                <div className="mt-4 flex flex-wrap items-center gap-2"><button type="button" onClick={()=>setTab('visualise')} className="rounded-xl border-2 border-[#c3d9c9] bg-white text-[#205f3c] px-3 py-2.5 min-h-11 text-xs font-extrabold">Explore this visually →</button></div>
+                <button type="button" onClick={()=>setRevealedTakeaway(revealedTakeaway===i?null:i)} className="mt-5 rounded-xl border-2 border-[#a8c9b3] bg-white text-[#1e5839] inline-flex gap-2 items-center px-3 py-2.5 text-xs font-extrabold hover:bg-[#dfeee3]">{revealedTakeaway===i?'Hide':'Reveal'} the takeaway <ChevronDown size={15} className={revealedTakeaway===i?'rotate-180':''}/></button>
+                {revealedTakeaway===i&&<p role="status" className="text-sm leading-7 text-forest border-l-4 border-[#6ea882] bg-white px-4 py-3 mt-3 rounded-lg">{lesson.points[i%Math.max(1,lesson.points.length)]||experience.advisorLens}</p>}
               </div>
             </details>)}
           </div>
@@ -497,15 +499,15 @@ export function PremiumLessonView({lesson, examWeight, completed, onBack, onStar
           <section className="rounded-[22px] border-2 border-[#dbe6dd] bg-white p-4 sm:p-6"><h2 className="font-extrabold text-lg text-forest mb-2">Tap a definition</h2><p className="text-xs text-muted mb-3">Select a term to read its explanation.</p><div className="flex flex-wrap gap-2 mb-4">{lesson.definitions.map(([term])=><button type="button" key={term} aria-pressed={activeDef===term} onClick={()=>setActiveDef(term)} className={`px-3 py-2.5 rounded-xl text-xs font-bold border ${activeDef===term?'bg-forest text-white border-forest':'bg-[#f2f7f3] text-pine border-[#dbe6dd]'}`}>{term}</button>)}</div>{lesson.definitions.filter(([term])=>activeDef===term).map(([term,description])=><div key={term} className="rounded-xl bg-[#f5f9f5] border border-[#dce9de] p-4"><strong className="text-forest">{term}</strong><p className="text-sm text-muted mt-2 leading-7">{description}</p></div>)}</section>
           <div className="space-y-3"><InfoCard icon={ListChecks} title="Key points" tone="green">{lesson.points.map(x=><li className="flex gap-2" key={x}><Check size={17} className="shrink-0 mt-1"/>{x}</li>)}</InfoCard><InfoCard icon={TriangleAlert} title="Exam traps" tone="amber">{lesson.traps.map(x=><li className="flex gap-2" key={x}><TriangleAlert size={17} className="shrink-0 mt-1"/>{x}</li>)}</InfoCard></div>
         </div>
-        <div className="rounded-[20px] border border-[#d5e5da] bg-[#f0f7f1] p-4"><p className="text-[11px] uppercase tracking-wider font-bold text-[#63846e]">Adviser insight</p><p className="text-sm leading-7 text-forest mt-2">{experience.advisorLens}</p></div>
+        <div className="rounded-[20px] border-2 border-[#bcd5c4] bg-white p-4"><p className="text-[11px] uppercase tracking-wider font-bold text-[#63846e]">Adviser insight</p><p className="text-sm leading-7 text-forest mt-2">{experience.advisorLens}</p></div>
       </div>}
       {tab === 'visualise' && <div className="space-y-4">
         <section className="rounded-[21px] border-2 border-[#d9e6dd] bg-white p-4 sm:p-6"><div className="flex items-center gap-2"><MoveRight size={20} className="text-pine"/><h2 className="font-extrabold text-xl text-forest">How the pieces connect</h2></div><p className="text-sm leading-6 text-muted mt-2 mb-4">{experience.visualIntro}</p>
-          <div className="grid grid-cols-3 gap-2">{experience.stages.map((stage,i)=><button type="button" key={stage.title} aria-pressed={activeStage===i} onClick={()=>setActiveStage(i)} className={`rounded-xl border-2 min-w-0 px-2.5 py-3 sm:p-4 text-left ${activeStage===i?'bg-[#164532] border-[#164532] text-white':'bg-[#f7faf7] border-[#dce6dd] text-forest'}`}><span className="block text-[10px] uppercase tracking-widest opacity-70">Step {i+1}</span><strong className="block text-xs sm:text-sm leading-5 mt-2 break-words">{stage.title}</strong></button>)}</div>
-          <div role="status" className="rounded-[15px] bg-[#f2f8f3] border border-[#dbe8dc] p-4 mt-3"><p className="text-xs font-extrabold uppercase tracking-widest text-[#699178]">{experience.stages[activeStage].caption}</p><p className="text-sm leading-7 text-forest mt-2">{experience.stages[activeStage].detail}</p></div>
+          <div className="grid grid-cols-3 gap-2">{experience.stages.map((stage,i)=><button type="button" key={stage.title} aria-pressed={activeStage===i} onClick={()=>setActiveStage(i)} className={`rounded-xl border-2 min-w-0 px-2.5 py-3 sm:p-4 text-left ${activeStage===i?'bg-[#103f2d] border-[#103f2d] text-white shadow-sm':'bg-[#f7faf7] border-[#dce6dd] text-forest'}`}><span className="block text-[10px] uppercase tracking-widest opacity-70">Step {i+1}</span><strong className="block text-xs sm:text-sm leading-5 mt-2 break-words">{stage.title}</strong></button>)}</div>
+          <div role="status" className="rounded-[15px] bg-white border-2 border-[#cbded0] p-4 mt-3"><p className="text-xs font-extrabold uppercase tracking-widest text-[#699178]">{experience.stages[activeStage].caption}</p><p className="text-sm leading-7 text-forest mt-2">{experience.stages[activeStage].detail}</p></div>
         </section>
         <ConceptLab key={lesson.id} lo={lesson.lo}/>
-        <section className="rounded-[22px] border-2 border-[#dbe6dd] bg-white p-4 sm:p-6"><h2 className="text-xl font-extrabold text-forest">{experience.compareTitle}</h2><p className="text-xs text-muted mt-2 mb-4">Important distinctions to take into the exam.</p><div className="space-y-2.5">{experience.compareRows.map(row=><details className="group border border-[#dce7dd] rounded-xl overflow-hidden" key={row.label}><summary className="list-none [&::-webkit-details-marker]:hidden px-4 py-3.5 cursor-pointer flex justify-between items-center gap-2 bg-[#f8fbf8]"><strong className="text-sm text-forest">{row.label}</strong><ChevronDown size={17} className="text-[#6c8d79] shrink-0 group-open:rotate-180"/></summary><div className="grid sm:grid-cols-2 gap-0 border-t border-[#e1e9e1]"><p className="text-sm leading-7 p-4 text-forest">{row.left}</p><p className="text-sm leading-7 p-4 bg-[#f3f8f4] text-forest border-t sm:border-t-0 sm:border-l border-[#e1e9e1]">{row.right}</p></div></details>)}</div></section>
+        <section className="rounded-[22px] border-2 border-[#dbe6dd] bg-white p-4 sm:p-6"><h2 className="text-xl font-extrabold text-forest">{experience.compareTitle}</h2><p className="text-xs text-muted mt-2 mb-4">Important distinctions to take into the exam.</p><div className="space-y-2.5">{experience.compareRows.map(row=><details className="group border border-[#dce7dd] rounded-xl overflow-hidden" key={row.label}><summary className="list-none [&::-webkit-details-marker]:hidden px-4 py-3.5 cursor-pointer flex justify-between items-center gap-2 bg-[#f8fbf8]"><strong className="text-sm text-forest">{row.label}</strong><ChevronDown size={17} className="text-[#6c8d79] shrink-0 group-open:rotate-180"/></summary><div className="grid sm:grid-cols-2 gap-0 border-t border-[#e1e9e1]"><p className="text-sm leading-7 p-4 text-forest">{row.left}</p><p className="text-sm leading-7 p-4 bg-[#f8fbf8] text-forest border-t sm:border-t-0 sm:border-l border-[#e1e9e1]">{row.right}</p></div></details>)}</div></section>
       </div>}
       {tab === 'example' && (
         <div className="space-y-5 mt-5">
@@ -553,7 +555,7 @@ export function PremiumLessonView({lesson, examWeight, completed, onBack, onStar
         </div>
       )}
 
-      {tab === 'try' && <div className="space-y-4"><section className="rounded-[21px] border-2 border-[#d9e6dd] bg-white p-4 sm:p-6"><p className="text-[11px] tracking-[.17em] uppercase font-extrabold text-[#6e8c77]">Practice before the mock</p><h2 className="text-xl font-extrabold text-forest mt-1">Put it into practice</h2><p className="text-sm text-muted leading-6 mt-2">Try a realistic client decision with instant feedback, then start the graded five-question assessment.</p></section><LessonActivities key={lesson.id} lo={lesson.lo}/><section className="rounded-[21px] border-2 border-[#d9e6dd] bg-[#f0f7f1] p-4 sm:p-6"><p className="text-[11px] font-extrabold uppercase tracking-wider text-[#6c8a74]">Self-test</p><h3 className="text-lg font-bold text-forest mt-2">{experience.revisionChallenge}</h3><p className="text-sm text-muted leading-6 mt-2">Can you justify your answer and one likely exam trap? Now test your recall with scored questions.</p><button type="button" className="btn-primary mt-4" onClick={onStartCheck}>Start 5-question check <ArrowRight size={16}/></button></section></div>}
+      {tab === 'try' && <div className="space-y-4"><section className="rounded-[21px] border-2 border-[#d9e6dd] bg-white p-4 sm:p-6"><p className="text-[11px] tracking-[.17em] uppercase font-extrabold text-[#6e8c77]">Practice before the mock</p><h2 className="text-xl font-extrabold text-forest mt-1">Put it into practice</h2><p className="text-sm text-muted leading-6 mt-2">Try a realistic client decision with instant feedback, then start the graded five-question assessment.</p></section><LessonActivities key={lesson.id} lo={lesson.lo}/><section className="rounded-[21px] border-2 border-[#bdd5c3] bg-white p-4 sm:p-6"><p className="text-[11px] font-extrabold uppercase tracking-wider text-[#6c8a74]">Self-test</p><h3 className="text-lg font-bold text-forest mt-2">{experience.revisionChallenge}</h3><p className="text-sm text-muted leading-6 mt-2">Can you justify your answer and one likely exam trap? Now test your recall with scored questions.</p><button type="button" className="btn-primary mt-4" onClick={onStartCheck}>Start 5-question check <ArrowRight size={16}/></button></section></div>}
       <div className="grid lg:grid-cols-[1fr_auto] gap-3 mt-5 mb-10">
         <button type="button" className={`w-full ${completed ? 'btn-outline' : 'btn-primary'}`} onClick={onToggleComplete}>
           {completed ? <><Check size={18} /> Completed · Mark incomplete</> : <><Check size={18} /> Mark lesson complete</>}
@@ -564,11 +566,24 @@ export function PremiumLessonView({lesson, examWeight, completed, onBack, onStar
   );
 }
 
+function InlineCheck({check}:{check:MicroCheck}){
+ const [answer,setAnswer]=useState<boolean|null>(null);
+ return <div className="mt-5 rounded-2xl border-2 border-[#bdd7c5] bg-[#f9fcfa] p-4 sm:p-5">
+  <p className="text-[11px] font-extrabold uppercase tracking-[.16em] text-[#3d7150]">Quick understanding check</p>
+  <h4 className="font-extrabold text-[#173e2a] mt-2 text-sm sm:text-base leading-7">{check.prompt}</h4>
+  <div className="grid grid-cols-2 gap-2 mt-3">{[true,false].map(v=><button type="button" key={String(v)} aria-pressed={answer===v} onClick={()=>setAnswer(v)} className={`border-2 rounded-xl py-3 font-extrabold text-sm ${answer===v?'bg-[#123f2b] border-[#123f2b] text-white':'bg-white border-[#bed5c5] text-[#22583a] hover:border-[#599775]'}`}>{v?'True':'False'}</button>)}</div>
+  {answer!==null&&<div role="status" className={`mt-3 rounded-xl border-2 p-3 text-sm leading-6 ${answer===check.answer?'border-[#a7d1b5] bg-white text-[#245a3b]':'border-[#e4c99f] bg-[#fffaf3] text-[#704d22]'}`}><strong className="block mb-1">{answer===check.answer?'Correct — well remembered':'Not quite — here is why'}</strong>{check.why}</div>}
+ </div>
+}
+function ReadableNote({body}:{body:string}){
+  const match=body.match(/^(.{20,180}?[.!?])\s+(.+)$/s);
+  return <p className="text-[15px] leading-[1.78] text-[#20382b] break-words">{match?<><strong className="font-extrabold text-[#143f2b]">{match[1]}</strong>{' '}{match[2]}</>:body}</p>
+}
 function InfoCard({icon: Icon, title, tone, children}: {icon: typeof CircleHelp; title: string; tone: 'green' | 'amber' | 'blue'; children: ReactNode}) {
   const tones = {
-    green: 'bg-[#f5faf6] border-[#dce7de] text-[#295f40]',
-    amber: 'bg-[#fff9ef] border-[#f0e1bc] text-[#7b5b21]',
-    blue: 'bg-[#f3f8fc] border-[#dbe6f4] text-[#2a5679]',
+    green: 'bg-white border-2 border-[#bad5c2] text-[#214d36]',
+    amber: 'bg-[#fffbf2] border-2 border-[#e7c98b] text-[#624619]',
+    blue: 'bg-white border-2 border-[#bfcfe2] text-[#224c69]',
   } as const;
 
   return (
