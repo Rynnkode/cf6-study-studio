@@ -1,5 +1,7 @@
 import {useEffect, useMemo, useState, type ReactNode} from 'react';
-import {ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, CircleHelp, FileText, Lightbulb, ListChecks, MoveRight, Sparkles, TriangleAlert} from 'lucide-react';
+import {ArrowRight, BookOpen, Check, CheckCircle2, ChevronDown, ChevronLeft, CircleHelp, FileText, Lightbulb, ListChecks, MoveRight, TriangleAlert} from 'lucide-react';
+import ConceptLab from './ConceptLab';
+import LessonActivities from './LessonActivities';
 import type {Lesson} from '../data/syllabus';
 
 export type PremiumLessonViewProps = {
@@ -435,8 +437,8 @@ const experiences: Record<number, LessonExperience> = {
 
 const tabMeta: Array<{key: TabKey; label: string; note: string}> = [
   {key: 'learn', label: 'Learn', note: 'Chunked notes'},
-  {key: 'visualise', label: 'Visualise', note: 'Charts & flows'},
-  {key: 'example', label: 'Worked example', note: 'Apply the topic'},
+  {key: 'visualise', label: 'Explore', note: 'Interactive tools'},
+  {key: 'example', label: 'Example', note: 'Worked case'},
   {key: 'try', label: 'Try it', note: 'Active recall'},
 ];
 
@@ -449,12 +451,14 @@ export function PremiumLessonView({lesson, examWeight, completed, onBack, onStar
   const [tab, setTab] = useState<TabKey>('learn');
   const [activeStage, setActiveStage] = useState(0);
   const [activeDef, setActiveDef] = useState(lesson.definitions[0]?.[0] ?? '');
+  const [revealedTakeaway,setRevealedTakeaway]=useState<number|null>(null);
   const experience = experiences[lesson.lo];
 
   useEffect(() => {
     setTab('learn');
     setActiveStage(0);
     setActiveDef(lesson.definitions[0]?.[0] ?? '');
+    setRevealedTakeaway(null);
   }, [lesson.id]);
 
   const readingTime = useMemo(() => estimReadingTime(lesson), [lesson]);
@@ -466,196 +470,43 @@ export function PremiumLessonView({lesson, examWeight, completed, onBack, onStar
 
   return (
     <>
-      <button className="text-pine font-bold text-sm flex items-center gap-2 mb-5" onClick={onBack}>
-        <ChevronLeft size={17} /> All lessons
-      </button>
-
-      <section className="rounded-[28px] border border-[#d6e4d8] bg-gradient-to-br from-[#ffffff] via-[#fbfdfb] to-[#eef5ef] p-5 md:p-7 shadow-[0_12px_40px_rgba(43,77,56,.08)]">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <span className="chip bg-sage text-pine">Week {lesson.week} • Learning outcome {lesson.lo}</span>
-          <span className="text-sm text-muted">{examWeight} indicative standalone exam questions</span>
-        </div>
-
-        <div className="mt-5 grid lg:grid-cols-[1.4fr_.9fr] gap-5 items-start">
-          <div>
-            <p className="label mb-3">Premium lesson experience</p>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-forest leading-tight">{lesson.title}</h1>
-            <p className="text-lg text-muted mt-3 leading-8">{lesson.intro}</p>
-            <p className="text-sm text-forest/85 mt-4 rounded-2xl bg-white/80 border border-[#dce7de] p-4 leading-7">
-              <Sparkles size={15} className="inline mr-2 text-[#4e916e]" />
-              {experience.strapline}
-            </p>
+      <button type="button" className="text-pine font-bold text-sm inline-flex items-center gap-2 mb-4 min-h-9" onClick={onBack}><ChevronLeft size={17}/> Study programme</button>
+      <header className="rounded-[23px] border-2 border-[#d8e5da] bg-gradient-to-br from-white to-[#edf5ee] px-4 py-5 sm:p-7 shadow-[0_8px_24px_rgba(24,69,40,.05)]">
+        <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-[#557763]"><span className="rounded-full bg-[#dfece2] px-3 py-1.5">WEEK {lesson.week}</span><span className="rounded-full border border-[#d6e4d9] bg-white px-3 py-1.5">OUTCOME {lesson.lo}</span>{completed&&<span className="rounded-full bg-[#d9eee0] text-[#2b7450] px-3 py-1.5 inline-flex items-center gap-1"><CheckCircle2 size={13}/> Completed</span>}</div>
+        <h1 className="text-[26px] sm:text-[35px] font-extrabold text-forest tracking-tight leading-[1.14] mt-3">{lesson.title}</h1>
+        <p className="text-sm text-muted leading-6 mt-2">{lesson.intro}</p>
+        <div className="border-t border-[#dbe7de] mt-4 pt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs font-bold text-[#648272]"><span><BookOpen size={14} className="inline mr-1"/>{readingTime} min estimated read</span><span><Lightbulb size={14} className="inline mr-1"/>{lesson.definitions.length} key definitions</span><span><CircleHelp size={14} className="inline mr-1"/>5 practice questions · {examWeight} indicative exam Qs</span></div>
+      </header>
+      <nav className="grid grid-cols-4 gap-1.5 sm:gap-3 my-4" aria-label="Lesson sections">
+        {tabMeta.map(item=><button type="button" key={item.key} aria-current={tab===item.key?'page':undefined} onClick={()=>setTab(item.key)} className={`min-w-0 rounded-xl border-2 px-1.5 py-3 sm:p-4 text-center sm:text-left transition-colors ${tab===item.key?'bg-[#164532] text-white border-[#164532]':'bg-white text-forest border-[#dce7df] hover:border-[#89ab94]'}`}><span className="block text-[12px] sm:text-base font-extrabold leading-tight">{item.label}</span><span className={`hidden sm:block text-[11px] mt-1 ${tab===item.key?'text-white/75':'text-muted'}`}>{item.note}</span></button>)}
+      </nav>
+      {tab === 'learn' && <div className="space-y-4">
+        <section className="rounded-[22px] border-2 border-[#dbe6dd] bg-white p-4 sm:p-6">
+          <div className="flex items-center gap-3 mb-4"><span className="bg-[#edf5ee] text-[#386b4c] rounded-xl p-2.5"><BookOpen size={19}/></span><div><h2 className="font-extrabold text-xl text-forest">Learn the essentials</h2><p className="text-sm text-muted mt-1">Open a section, read the concept, then test what stayed with you.</p></div></div>
+          <div className="space-y-2.5">
+            {learnSections.map((section,i)=><details key={section.title} className="group rounded-[17px] border border-[#dce7de] bg-[#fcfdfc] overflow-hidden" open={i===0}>
+              <summary className="cursor-pointer list-none flex items-center justify-between gap-3 p-4 sm:p-5 [&::-webkit-details-marker]:hidden"><div><p className="text-[10px] uppercase tracking-[.16em] font-extrabold text-[#7a9782]">Concept {String(i+1).padStart(2,'0')}</p><h3 className="text-base sm:text-lg font-extrabold text-forest mt-1">{section.title}</h3></div><ChevronDown className="group-open:rotate-180 transition-transform shrink-0 text-[#72927c]" size={18}/></summary>
+              <div className="border-t border-[#e2ece4] p-4 sm:p-5 bg-white"><p className="text-sm sm:text-[15px] leading-[1.8] text-[#30483a]">{section.body}</p>
+                <button type="button" onClick={()=>setRevealedTakeaway(revealedTakeaway===i?null:i)} className="mt-5 rounded-xl border border-[#bdd8c6] bg-[#eff6f0] text-[#286445] inline-flex gap-2 items-center px-3 py-2.5 text-xs font-extrabold hover:bg-[#dfeee3]">{revealedTakeaway===i?'Hide':'Reveal'} the takeaway <ChevronDown size={15} className={revealedTakeaway===i?'rotate-180':''}/></button>
+                {revealedTakeaway===i&&<p role="status" className="text-sm leading-7 text-forest border-l-4 border-[#6ea882] bg-[#f1f8f3] px-4 py-3 mt-3 rounded-lg">{lesson.points[i%Math.max(1,lesson.points.length)]||experience.advisorLens}</p>}
+              </div>
+            </details>)}
           </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <MetricCard label="Reading time" value={`${readingTime} min`} />
-            <MetricCard label="Definitions" value={`${lesson.definitions.length}`} />
-            <MetricCard label="Knowledge check" value="5 questions" />
-            <MetricCard label="Revision level" value={completed ? 'Complete' : 'Open'} tone={completed ? 'success' : 'neutral'} />
-          </div>
+        </section>
+        <div className="grid lg:grid-cols-2 gap-4">
+          <section className="rounded-[22px] border-2 border-[#dbe6dd] bg-white p-4 sm:p-6"><h2 className="font-extrabold text-lg text-forest mb-2">Tap a definition</h2><p className="text-xs text-muted mb-3">Select a term to read its explanation.</p><div className="flex flex-wrap gap-2 mb-4">{lesson.definitions.map(([term])=><button type="button" key={term} aria-pressed={activeDef===term} onClick={()=>setActiveDef(term)} className={`px-3 py-2.5 rounded-xl text-xs font-bold border ${activeDef===term?'bg-forest text-white border-forest':'bg-[#f2f7f3] text-pine border-[#dbe6dd]'}`}>{term}</button>)}</div>{lesson.definitions.filter(([term])=>activeDef===term).map(([term,description])=><div key={term} className="rounded-xl bg-[#f5f9f5] border border-[#dce9de] p-4"><strong className="text-forest">{term}</strong><p className="text-sm text-muted mt-2 leading-7">{description}</p></div>)}</section>
+          <div className="space-y-3"><InfoCard icon={ListChecks} title="Key points" tone="green">{lesson.points.map(x=><li className="flex gap-2" key={x}><Check size={17} className="shrink-0 mt-1"/>{x}</li>)}</InfoCard><InfoCard icon={TriangleAlert} title="Exam traps" tone="amber">{lesson.traps.map(x=><li className="flex gap-2" key={x}><TriangleAlert size={17} className="shrink-0 mt-1"/>{x}</li>)}</InfoCard></div>
         </div>
-      </section>
-
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-5">
-        {tabMeta.map(item => (
-          <button
-            key={item.key}
-            onClick={() => setTab(item.key)}
-            className={`rounded-[22px] border px-4 py-4 text-left transition ${tab === item.key ? 'bg-forest text-white border-forest shadow-lg' : 'bg-white border-[#dfe7df] text-forest hover:border-[#96b79f]'}`}
-          >
-            <div className="font-extrabold text-lg">{item.label}</div>
-            <div className={`text-xs mt-1 ${tab === item.key ? 'text-white/80' : 'text-muted'}`}>{item.note}</div>
-          </button>
-        ))}
-      </div>
-
-      {tab === 'learn' && (
-        <div className="space-y-5 mt-5">
-          <section className="card p-5 md:p-7">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="rounded-2xl bg-sage text-pine p-3"><BookOpen size={20} /></div>
-              <div>
-                <h2 className="section-title">Learn the core ideas</h2>
-                <p className="text-sm text-muted mt-1">Tap into the topic in digestible chunks rather than one long wall of text.</p>
-              </div>
-            </div>
-            <div className="space-y-4">
-              {learnSections.map(section => (
-                <article key={section.title} className="rounded-2xl border border-[#e3ebe3] bg-[#fbfcfb] p-4 md:p-5">
-                  <div className="flex items-center gap-2"><span className="chip bg-sage text-pine">Focus</span><h3 className="font-extrabold text-forest">{section.title}</h3></div>
-                  <p className="text-[15px] leading-8 text-ink mt-3">{section.body}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="grid lg:grid-cols-[1.1fr_.9fr] gap-5">
-            <div className="card p-5 md:p-7">
-              <div className="flex items-start gap-3 mb-4">
-                <div className="rounded-2xl bg-sage text-pine p-3"><FileText size={20} /></div>
-                <div>
-                  <h2 className="section-title">Definitions you should recognise</h2>
-                  <p className="text-sm text-muted mt-1">Use the buttons to focus on one term at a time.</p>
-                </div>
-              </div>
-              <div className="flex gap-2 flex-wrap mb-4">
-                {lesson.definitions.map(([term]) => (
-                  <button key={term} onClick={() => setActiveDef(term)} className={`chip ${activeDef === term ? 'bg-forest text-white' : 'bg-sage text-pine'}`}>{term}</button>
-                ))}
-              </div>
-              {lesson.definitions.map(([term, description]) => activeDef === term ? (
-                <div key={term} className="rounded-2xl border border-[#dfe7df] bg-[#fbfdfb] p-5">
-                  <h3 className="font-extrabold text-forest text-lg">{term}</h3>
-                  <p className="text-sm text-muted leading-7 mt-2">{description}</p>
-                </div>
-              ) : null)}
-            </div>
-
-            <div className="space-y-5">
-              <InfoCard icon={ListChecks} title="Remember these" tone="green">
-                {lesson.points.map(point => (
-                  <li key={point} className="flex gap-2"><Check size={16} className="shrink-0 mt-1 text-[#3d815b]" /> <span>{point}</span></li>
-                ))}
-              </InfoCard>
-
-              <InfoCard icon={TriangleAlert} title="Common exam traps" tone="amber">
-                {lesson.traps.map(point => (
-                  <li key={point} className="flex gap-2"><TriangleAlert size={16} className="shrink-0 mt-1 text-[#a8742a]" /> <span>{point}</span></li>
-                ))}
-              </InfoCard>
-
-              <div className="card p-5 bg-gradient-to-br from-[#f3f8f4] to-white border-[#dce7de]">
-                <p className="label mb-2">Advisor lens</p>
-                <h3 className="font-extrabold text-forest text-lg">Why this matters in real advice</h3>
-                <p className="text-sm text-muted mt-3 leading-7">{experience.advisorLens}</p>
-              </div>
-            </div>
-          </section>
-        </div>
-      )}
-
-      {tab === 'visualise' && (
-        <div className="space-y-5 mt-5">
-          <section className="card p-5 md:p-7 bg-gradient-to-br from-[#fbfdfb] to-[#f1f6f2] border-[#dbe7dd]">
-            <h2 className="section-title">Visualise the idea</h2>
-            <p className="text-sm text-muted mt-2 leading-7">{experience.visualIntro}</p>
-          </section>
-
-          <section className="card p-5 md:p-7">
-            <div className="flex items-start gap-3 mb-5">
-              <div className="rounded-2xl bg-sage text-pine p-3"><MoveRight size={20} /></div>
-              <div>
-                <h2 className="section-title">How it works</h2>
-                <p className="text-sm text-muted mt-1">Follow the three stages. Tap a stage to reveal its role.</p>
-              </div>
-            </div>
-            <div className="grid sm:grid-cols-3 gap-3">
-              {experience.stages.map((stage, index) => (
-                <button key={stage.title} onClick={() => setActiveStage(index)} className={`rounded-[22px] border p-4 text-left transition ${activeStage === index ? 'bg-forest text-white border-forest shadow-md' : 'bg-white border-[#dfe7df] text-forest hover:border-[#98b7a2]'}`}>
-                  <div className="text-xs uppercase tracking-[.2em] font-bold opacity-80">Step {index + 1}</div>
-                  <div className="font-extrabold text-2xl mt-3 leading-tight">{stage.title}</div>
-                  <div className={`text-sm mt-2 ${activeStage === index ? 'text-white/80' : 'text-muted'}`}>{stage.caption}</div>
-                </button>
-              ))}
-            </div>
-            <div className="rounded-[24px] border border-[#dfe7df] bg-[#fbfdfb] p-5 md:p-6 mt-4">
-              <p className="label">Expanded explanation</p>
-              <h3 className="font-extrabold text-forest text-2xl mt-2">{experience.stages[activeStage].title}</h3>
-              <p className="text-sm text-muted mt-3 leading-8">{experience.stages[activeStage].detail}</p>
-            </div>
-          </section>
-
-          <div className="grid xl:grid-cols-[1.05fr_.95fr] gap-5">
-            <section className="card p-5 md:p-7">
-              <div className="flex items-start gap-3 mb-5">
-                <div className="rounded-2xl bg-sage text-pine p-3"><Sparkles size={20} /></div>
-                <div>
-                  <h2 className="section-title">{experience.compareTitle}</h2>
-                  <p className="text-sm text-muted mt-1">A simple comparison makes the exam differences much easier to remember.</p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                {experience.compareRows.map(row => (
-                  <div key={row.label} className="rounded-2xl border border-[#dfe7df] overflow-hidden">
-                    <div className="bg-[#f4f8f4] px-4 py-3 font-bold text-forest text-sm">{row.label}</div>
-                    <div className="grid md:grid-cols-2">
-                      <div className="p-4 text-sm leading-7 border-b md:border-b-0 md:border-r border-[#e5ece5] bg-white"><span className="font-semibold text-forest">Left view:</span> {row.left}</div>
-                      <div className="p-4 text-sm leading-7 bg-[#fbfdfb]"><span className="font-semibold text-forest">Right view:</span> {row.right}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="card p-5 md:p-7">
-              <div className="flex items-start gap-3 mb-5">
-                <div className="rounded-2xl bg-sage text-pine p-3"><Lightbulb size={20} /></div>
-                <div>
-                  <h2 className="section-title">Illustration panel</h2>
-                  <p className="text-sm text-muted mt-1">This is a custom visual anchor to make the topic feel intentional rather than text-only.</p>
-                </div>
-              </div>
-              <div className="rounded-[26px] p-5 border border-[#dbe6dc] bg-gradient-to-br from-[#14543a] via-[#1f6949] to-[#275f4b] text-white overflow-hidden relative">
-                <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10" />
-                <div className="absolute -left-10 bottom-2 h-24 w-24 rounded-full bg-white/5" />
-                <p className="text-xs uppercase tracking-[.25em] text-white/70">{experience.imageTitle}</p>
-                <div className="grid grid-cols-2 gap-3 mt-4">
-                  {experience.imagePoints.map((point, index) => (
-                    <div key={point} className="rounded-2xl bg-white/10 backdrop-blur p-4 border border-white/10">
-                      <div className="text-[11px] uppercase tracking-[.22em] text-white/60">Point {index + 1}</div>
-                      <div className="font-bold mt-2 leading-6">{point}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 rounded-2xl bg-white/10 p-4 text-sm text-white/90 leading-7">
-                  <strong>Memory cue:</strong> Talk yourself through the pathway from top left to bottom right as if you were explaining it to a client.
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
-      )}
-
+        <div className="rounded-[20px] border border-[#d5e5da] bg-[#f0f7f1] p-4"><p className="text-[11px] uppercase tracking-wider font-bold text-[#63846e]">Adviser insight</p><p className="text-sm leading-7 text-forest mt-2">{experience.advisorLens}</p></div>
+      </div>}
+      {tab === 'visualise' && <div className="space-y-4">
+        <section className="rounded-[21px] border-2 border-[#d9e6dd] bg-white p-4 sm:p-6"><div className="flex items-center gap-2"><MoveRight size={20} className="text-pine"/><h2 className="font-extrabold text-xl text-forest">How the pieces connect</h2></div><p className="text-sm leading-6 text-muted mt-2 mb-4">{experience.visualIntro}</p>
+          <div className="grid grid-cols-3 gap-2">{experience.stages.map((stage,i)=><button type="button" key={stage.title} aria-pressed={activeStage===i} onClick={()=>setActiveStage(i)} className={`rounded-xl border-2 min-w-0 px-2.5 py-3 sm:p-4 text-left ${activeStage===i?'bg-[#164532] border-[#164532] text-white':'bg-[#f7faf7] border-[#dce6dd] text-forest'}`}><span className="block text-[10px] uppercase tracking-widest opacity-70">Step {i+1}</span><strong className="block text-xs sm:text-sm leading-5 mt-2 break-words">{stage.title}</strong></button>)}</div>
+          <div role="status" className="rounded-[15px] bg-[#f2f8f3] border border-[#dbe8dc] p-4 mt-3"><p className="text-xs font-extrabold uppercase tracking-widest text-[#699178]">{experience.stages[activeStage].caption}</p><p className="text-sm leading-7 text-forest mt-2">{experience.stages[activeStage].detail}</p></div>
+        </section>
+        <ConceptLab key={lesson.id} lo={lesson.lo}/>
+        <section className="rounded-[22px] border-2 border-[#dbe6dd] bg-white p-4 sm:p-6"><h2 className="text-xl font-extrabold text-forest">{experience.compareTitle}</h2><p className="text-xs text-muted mt-2 mb-4">Important distinctions to take into the exam.</p><div className="space-y-2.5">{experience.compareRows.map(row=><details className="group border border-[#dce7dd] rounded-xl overflow-hidden" key={row.label}><summary className="list-none [&::-webkit-details-marker]:hidden px-4 py-3.5 cursor-pointer flex justify-between items-center gap-2 bg-[#f8fbf8]"><strong className="text-sm text-forest">{row.label}</strong><ChevronDown size={17} className="text-[#6c8d79] shrink-0 group-open:rotate-180"/></summary><div className="grid sm:grid-cols-2 gap-0 border-t border-[#e1e9e1]"><p className="text-sm leading-7 p-4 text-forest">{row.left}</p><p className="text-sm leading-7 p-4 bg-[#f3f8f4] text-forest border-t sm:border-t-0 sm:border-l border-[#e1e9e1]">{row.right}</p></div></details>)}</div></section>
+      </div>}
       {tab === 'example' && (
         <div className="space-y-5 mt-5">
           <section className="card p-5 md:p-7">
@@ -702,42 +553,7 @@ export function PremiumLessonView({lesson, examWeight, completed, onBack, onStar
         </div>
       )}
 
-      {tab === 'try' && (
-        <div className="space-y-5 mt-5">
-          <section className="card p-5 md:p-7">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="rounded-2xl bg-sage text-pine p-3"><CircleHelp size={20} /></div>
-              <div>
-                <h2 className="section-title">Active recall steps</h2>
-                <p className="text-sm text-muted mt-1">Use these prompts before starting the formal five-question check.</p>
-              </div>
-            </div>
-            <div className="grid md:grid-cols-3 gap-4">
-              {experience.stages.map((stage, index) => (
-                <div key={stage.title} className="rounded-[22px] border border-[#dfe7df] bg-[#fbfcfb] p-5">
-                  <div className="text-xs uppercase tracking-[.2em] text-muted font-bold">Prompt {index + 1}</div>
-                  <h3 className="font-extrabold text-forest text-xl mt-3">{stage.title}</h3>
-                  <p className="text-sm text-muted leading-7 mt-3">Without looking back, explain why <strong>{stage.title.toLowerCase()}</strong> matters in this lesson.</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="card p-5 md:p-7 bg-gradient-to-br from-[#f8fbf8] to-white border-[#dbe5dc]">
-            <p className="label mb-2">Self-check challenge</p>
-            <h2 className="section-title">Speak the answer out loud</h2>
-            <p className="text-sm text-muted mt-2 leading-7">{experience.revisionChallenge}</p>
-            <div className="rounded-[20px] bg-white border border-[#e1e8e1] p-4 mt-4 text-sm leading-7 text-ink">
-              If you struggle, go back to <strong>Learn</strong> for the chunked notes or <strong>Visualise</strong> for the flow and comparison view. Then try again before taking the marked check.
-            </div>
-            <div className="flex flex-wrap gap-3 mt-5">
-              <button type="button" className="btn-primary" onClick={onStartCheck}>Start 5-question check <ArrowRight size={16} /></button>
-              <button type="button" className="btn-outline" onClick={onToggleComplete}>{completed ? <><Check size={17} /> Mark incomplete</> : <><Check size={17} /> Mark lesson complete</>}</button>
-            </div>
-          </section>
-        </div>
-      )}
-
+      {tab === 'try' && <div className="space-y-4"><section className="rounded-[21px] border-2 border-[#d9e6dd] bg-white p-4 sm:p-6"><p className="text-[11px] tracking-[.17em] uppercase font-extrabold text-[#6e8c77]">Practice before the mock</p><h2 className="text-xl font-extrabold text-forest mt-1">Put it into practice</h2><p className="text-sm text-muted leading-6 mt-2">Try a realistic client decision with instant feedback, then start the graded five-question assessment.</p></section><LessonActivities key={lesson.id} lo={lesson.lo}/><section className="rounded-[21px] border-2 border-[#d9e6dd] bg-[#f0f7f1] p-4 sm:p-6"><p className="text-[11px] font-extrabold uppercase tracking-wider text-[#6c8a74]">Self-test</p><h3 className="text-lg font-bold text-forest mt-2">{experience.revisionChallenge}</h3><p className="text-sm text-muted leading-6 mt-2">Can you justify your answer and one likely exam trap? Now test your recall with scored questions.</p><button type="button" className="btn-primary mt-4" onClick={onStartCheck}>Start 5-question check <ArrowRight size={16}/></button></section></div>}
       <div className="grid lg:grid-cols-[1fr_auto] gap-3 mt-5 mb-10">
         <button type="button" className={`w-full ${completed ? 'btn-outline' : 'btn-primary'}`} onClick={onToggleComplete}>
           {completed ? <><Check size={18} /> Completed · Mark incomplete</> : <><Check size={18} /> Mark lesson complete</>}
@@ -745,15 +561,6 @@ export function PremiumLessonView({lesson, examWeight, completed, onBack, onStar
         <button type="button" className="btn text-forest hover:bg-sage w-full lg:w-auto" onClick={onBack}>Return to programme</button>
       </div>
     </>
-  );
-}
-
-function MetricCard({label, value, tone = 'neutral'}: {label: string; value: string; tone?: 'neutral' | 'success'}) {
-  return (
-    <div className={`rounded-[24px] border p-4 ${tone === 'success' ? 'bg-[#eef6f0] border-[#cfe0d2]' : 'bg-white border-[#dfe7df]'}`}>
-      <div className="text-[11px] uppercase tracking-[.2em] text-muted font-bold">{label}</div>
-      <div className="text-3xl font-black text-forest mt-3">{value}</div>
-    </div>
   );
 }
 
